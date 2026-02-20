@@ -1,596 +1,563 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Nubara — Digital Studio</title>
+	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+	<style>
+		:root {
+			--black:#050508;--white:#f5f5f0;--grey1:#0d0d12;--grey2:#1a1a22;
+			--grey3:#2a2a35;--grey4:#555566;--grey5:#888899;
+			--border:rgba(255,255,255,0.08);--mono:"DM Mono",monospace;--display:"Syne",sans-serif;
+		}
+		html{scrollbar-width:thin;scrollbar-color:#333 #111;scroll-behavior:smooth;}
+		*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+		body{background:var(--black);color:var(--white);font-family:var(--display);overflow-x:hidden;cursor:none;}
 
-    <link href="assets/img/logo_link.png" rel="icon">
-    <title>Pudina Studio</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- AOS Animation CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    
-    <!-- Boxicons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+		.cursor{position:fixed;width:8px;height:8px;background:var(--white);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s,height .3s;}
+		.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(255,255,255,0.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s;}
+		.cursor.hover{width:4px;height:4px;}.cursor-ring.hover{width:56px;height:56px;opacity:.5;}
 
-    <!-- Main CSS -->
-     <link rel="stylesheet" href="assets/css/style.css" type="text/css">
+		#vanta-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
+		.site-wrap{position:relative;z-index:2;}
+		section{position:relative;overflow:hidden;}
+		.container{max-width:1280px;margin:0 auto;padding:0 48px;}
+
+		.eyebrow{font-family:var(--mono);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--grey5);display:flex;align-items:center;gap:12px;}
+		.eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--grey4);}
+
+		/* NAV */
+		nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:1.5rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,padding .4s;}
+		nav.scrolled{background:rgba(5,5,8,.88);backdrop-filter:blur(16px);padding:1rem 3rem;border-bottom:1px solid var(--border);}
+		.nav-logo{font-family:var(--display);font-weight:800;font-size:1.2rem;letter-spacing:-.02em;color:var(--white);text-decoration:none;}
+		.nav-logo span{color:var(--grey4);}
+		.nav-links{display:flex;gap:2.5rem;list-style:none;}
+		.nav-links a{font-family:var(--mono);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--grey5);text-decoration:none;transition:color .2s;}
+		.nav-links a:hover{color:var(--white);}
+		.nav-cta{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--white);border:1px solid rgba(255,255,255,.2);padding:.55rem 1.4rem;border-radius:2px;text-decoration:none;transition:background .2s,border-color .2s;}
+		.nav-cta:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.5);}
+
+		/* HERO */
+		#hero{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none;}
+		.hero-tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:24px;}
+		.hero-title{font-size:clamp(3.5rem,11vw,8rem);font-weight:800;line-height:.92;letter-spacing:-.03em;text-align:center;text-shadow:0 0 80px rgba(255,255,255,.1),0 4px 60px rgba(0,0,0,.9);will-change:transform;}
+		.hero-title span{color:rgba(255,255,255,.2);}
+		.hero-sub{font-family:var(--mono);font-size:.75rem;letter-spacing:.3em;color:rgba(255,255,255,.2);text-transform:uppercase;margin-top:32px;will-change:transform;}
+		.hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:all;}
+		.hero-scroll span{font-family:var(--mono);font-size:.58rem;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;}
+		.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,.5),transparent);animation:scrollLine 1.5s ease-in-out infinite;}
+		@keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform:scaleY(1);transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+		/* MARQUEE */
+		.marquee-wrap{position:relative;z-index:3;background:rgba(255,255,255,.03);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.1rem 0;overflow:hidden;pointer-events:none;}
+		.marquee-track{display:flex;animation:marquee 22s linear infinite;white-space:nowrap;}
+		.marquee-track span{font-family:var(--mono);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--grey4);padding:0 3rem;}
+		.marquee-track span.dot{color:var(--grey3);padding:0;letter-spacing:0;}
+		@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+		/* ABOUT */
+		#about{padding:10rem 0 8rem;background:var(--black);z-index:3;}
+		.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;}
+		.about-left .eyebrow{margin-bottom:2rem;}
+		.about-title{font-size:clamp(2.2rem,4vw,3.8rem);font-weight:800;line-height:1.0;letter-spacing:-.025em;margin-bottom:2rem;}
+		.about-title em{font-style:normal;color:var(--grey4);}
+		.about-body{font-family:var(--mono);font-size:.82rem;line-height:2;color:var(--grey5);max-width:420px;margin-bottom:2.5rem;}
+		.about-stats{display:flex;gap:3rem;}
+		.stat-item .num{font-size:2.8rem;font-weight:800;letter-spacing:-.03em;line-height:1;}
+		.stat-item .lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--grey4);margin-top:4px;}
+		.about-right{display:grid;grid-template-columns:1fr 1fr;gap:1rem;transform:skewY(-3deg);}
+		.about-card{background:var(--grey1);border:1px solid var(--border);padding:2rem 1.5rem;transform:skewY(3deg);transition:background .3s,border-color .3s;}
+		.about-card:hover{background:var(--grey2);border-color:rgba(255,255,255,.15);}
+		.about-card:nth-child(2){margin-top:2rem;}.about-card:nth-child(4){margin-top:-2rem;}
+		.about-card-icon{font-size:1.4rem;margin-bottom:1rem;}
+		.about-card h4{font-size:.95rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.5rem;}
+		.about-card p{font-family:var(--mono);font-size:.7rem;color:var(--grey4);line-height:1.8;}
+
+		/* SERVICES */
+		#services{padding:8rem 0;background:var(--grey1);clip-path:polygon(0 4%,100% 0,100% 96%,0 100%);z-index:3;margin:-2px 0;}
+		.services-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:5rem;}
+		.services-title{font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;}
+		.services-title em{font-style:normal;color:var(--grey4);}
+		.services-desc{font-family:var(--mono);font-size:.75rem;color:var(--grey5);max-width:300px;line-height:1.9;text-align:right;}
+		.services-list{display:flex;flex-direction:column;}
+		.service-row{display:grid;grid-template-columns:60px 1fr auto 120px;align-items:center;gap:2rem;padding:2rem 0;border-bottom:1px solid var(--border);transition:padding-left .3s;cursor:default;}
+		.service-row:first-child{border-top:1px solid var(--border);}
+		.service-row:hover{padding-left:1.5rem;}
+		.service-row:hover .service-name{color:var(--white);}
+		.service-num{font-family:var(--mono);font-size:.65rem;color:var(--grey3);letter-spacing:.1em;}
+		.service-name{font-size:clamp(1.2rem,2.2vw,1.8rem);font-weight:700;letter-spacing:-.02em;color:var(--grey5);transition:color .3s;}
+		.service-tags{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;}
+		.tag-pill{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--grey4);border:1px solid var(--border);padding:.3rem .7rem;border-radius:2px;}
+		.service-arrow{font-size:1.2rem;color:var(--grey3);text-align:right;transition:color .3s,transform .3s;}
+		.service-row:hover .service-arrow{color:var(--white);transform:translateX(4px);}
+
+		/* PORTFOLIO */
+		#portfolio{padding:10rem 0 8rem;background:var(--black);z-index:3;}
+		.portfolio-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:5rem;}
+		.portfolio-title{font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;}
+		.portfolio-title em{font-style:normal;color:var(--grey4);}
+		.portfolio-link{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--grey5);text-decoration:none;border-bottom:1px solid var(--grey3);padding-bottom:2px;transition:color .2s,border-color .2s;}
+		.portfolio-link:hover{color:var(--white);border-color:var(--white);}
+		.portfolio-stack{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+		.file-card{position:relative;background:var(--grey1);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .4s cubic-bezier(.25,.46,.45,.94),border-color .3s,box-shadow .4s;transform-origin:bottom center;}
+		.file-card:nth-child(odd){clip-path:polygon(0 0,100% 3%,100% 100%,0 97%);}
+		.file-card:nth-child(even){clip-path:polygon(0 3%,100% 0,100% 97%,0 100%);}
+		.file-card:hover{transform:translateY(-12px) rotate(-1deg);border-color:rgba(255,255,255,.2);box-shadow:0 30px 60px rgba(0,0,0,.5);z-index:10;}
+		.file-card:nth-child(even):hover{transform:translateY(-12px) rotate(1deg);}
+		.file-thumb{width:100%;aspect-ratio:16/10;background:var(--grey2);overflow:hidden;position:relative;}
+		.file-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(70%) brightness(.65);transition:transform .6s cubic-bezier(.25,.46,.45,.94),filter .4s;}
+		.file-card:hover .file-thumb img{transform:scale(1.08);filter:grayscale(20%) brightness(.85);}
+		.file-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(5,5,8,.88));pointer-events:none;}
+		.file-thumb-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;opacity:0;transition:opacity .3s;}
+		.file-card:hover .file-thumb-label{opacity:1;}
+		.file-thumb-label span{font-family:var(--mono);font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--white);background:rgba(5,5,8,.55);padding:.45rem 1.1rem;border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);}
+		.file-body{padding:1.4rem 1.5rem 1.6rem;}
+		.file-meta{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--grey4);margin-bottom:.6rem;}
+		.file-title{font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.5rem;}
+		.file-desc{font-family:var(--mono);font-size:.68rem;color:var(--grey4);line-height:1.8;}
+		.file-tab{position:absolute;top:-1px;left:20px;width:60px;height:6px;background:var(--grey3);border-radius:0 0 3px 3px;}
+
+		/* SHOP */
+		#shop{padding:10rem 0 8rem;background:var(--grey1);clip-path:polygon(0 3%,100% 0,100% 97%,0 100%);z-index:3;margin:-2px 0;}
+		.shop-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4rem;}
+		.shop-title{font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;}
+		.shop-title em{font-style:normal;color:var(--grey4);}
+		.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+		.product-card{background:var(--grey1);padding:2rem;display:flex;flex-direction:column;gap:1rem;transition:background .3s;cursor:pointer;}
+		.product-card:hover{background:var(--grey2);}
+		.product-thumb{width:100%;aspect-ratio:1;background:var(--grey2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.2;transition:opacity .3s;clip-path:polygon(0 0,100% 0,100% 88%,88% 100%,0 100%);}
+		.product-card:hover .product-thumb{opacity:.4;}
+		.product-cat{font-family:var(--mono);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--grey4);}
+		.product-name{font-size:.95rem;font-weight:700;letter-spacing:-.01em;}
+		.product-price{font-family:var(--mono);font-size:.85rem;color:var(--white);margin-top:auto;}
+		.product-price span{color:var(--grey4);font-size:.65rem;margin-left:4px;}
+		.product-btn{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;background:transparent;border:1px solid var(--border);color:var(--grey5);padding:.6rem 1rem;cursor:pointer;transition:all .2s;width:100%;}
+		.product-btn:hover{background:var(--white);color:var(--black);border-color:var(--white);}
+
+		/* TEAM */
+		#team{padding:10rem 0 8rem;background:var(--black);z-index:3;}
+		.team-header{margin-bottom:5rem;}
+		.team-title{font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;margin-top:1.5rem;}
+		.team-title em{font-style:normal;color:var(--grey4);}
+		.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
+		.team-card{position:relative;background:var(--grey1);border:1px solid var(--border);padding:2rem 1.5rem 1.5rem;transition:transform .3s,border-color .3s;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);}
+		.team-card::before{content:'';position:absolute;top:0;right:0;width:20px;height:20px;background:var(--grey3);clip-path:polygon(0 0,100% 100%,100% 0);transition:background .3s;}
+		.team-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.15);}
+		.team-card:hover::before{background:rgba(255,255,255,.15);}
+		.team-avatar{width:100%;aspect-ratio:3/2;background:var(--grey2);border-radius:2px;overflow:hidden;margin-bottom:1.2rem;position:relative;}
+		.team-avatar img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;filter:grayscale(80%) brightness(.7);transition:filter .4s,transform .5s;}
+		.team-card:hover .team-avatar img{filter:grayscale(40%) brightness(.85);transform:scale(1.04);}
+		.team-name{font-size:1rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.3rem;}
+		.team-role{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--grey4);margin-bottom:1rem;}
+		.team-bio{font-family:var(--mono);font-size:.68rem;color:var(--grey4);line-height:1.8;}
+
+		/* TESTIMONIALS */
+		#testimonials{padding:8rem 0;background:var(--grey1);clip-path:polygon(0 4%,100% 0,100% 96%,0 100%);z-index:3;margin:-2px 0;}
+		.testi-header{margin-bottom:4rem;}
+		.testi-title{font-size:clamp(2rem,3.5vw,3.2rem);font-weight:800;letter-spacing:-.02em;margin-top:1.5rem;}
+		.testi-title em{font-style:normal;color:var(--grey4);}
+		.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+		.testi-card{background:var(--grey2);border:1px solid var(--border);padding:2.5rem 2rem;transition:border-color .3s,transform .3s;}
+		.testi-card:nth-child(even){transform:skewY(-1.5deg);}
+		.testi-card:nth-child(even) .testi-inner{transform:skewY(1.5deg);}
+		.testi-card:nth-child(even):hover{transform:skewY(-1.5deg) translateY(-5px);}
+		.testi-card:not(:nth-child(even)):hover{transform:translateY(-5px);border-color:rgba(255,255,255,.15);}
+		.testi-quote{font-size:2rem;color:var(--grey3);line-height:1;margin-bottom:1rem;font-family:Georgia,serif;}
+		.testi-text{font-family:var(--mono);font-size:.75rem;line-height:2;color:var(--grey5);margin-bottom:2rem;}
+		.testi-author{display:flex;align-items:center;gap:1rem;}
+		.testi-avatar{width:36px;height:36px;background:var(--grey3);border-radius:2px;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+		.testi-name{font-size:.85rem;font-weight:700;letter-spacing:-.01em;}
+		.testi-company{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--grey4);}
+
+		/* PARTNERS */
+		#partners{padding:7rem 0;background:var(--black);z-index:3;}
+		.partners-header{text-align:center;margin-bottom:4rem;}
+		.partners-title{font-size:1.1rem;font-weight:700;color:var(--grey4);letter-spacing:-.01em;margin-top:1rem;}
+		.partners-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+		.partner-item{background:var(--black);padding:2rem;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+		.partner-item:hover{background:var(--grey1);}
+		.partner-logo{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--grey3);transition:color .2s;}
+		.partner-item:hover .partner-logo{color:var(--grey5);}
+
+		/* CONTACT */
+		#contact{padding:10rem 0 0;background:var(--grey1);clip-path:polygon(0 3%,100% 0,100% 100%,0 100%);z-index:3;margin-top:-2px;}
+		.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;margin-bottom:5rem;}
+		.contact-left .eyebrow{margin-bottom:2rem;}
+		.contact-title{font-size:clamp(2.5rem,4.5vw,4.5rem);font-weight:800;letter-spacing:-.025em;line-height:.95;margin-bottom:2rem;}
+		.contact-title em{font-style:normal;color:var(--grey4);}
+		.contact-body{font-family:var(--mono);font-size:.78rem;color:var(--grey5);line-height:2;margin-bottom:2.5rem;}
+		.contact-links{display:flex;flex-direction:column;gap:1rem;}
+		.contact-link{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--grey5);text-decoration:none;display:flex;align-items:center;gap:1rem;transition:color .2s;}
+		.contact-link::before{content:'';width:20px;height:1px;background:var(--grey3);transition:width .3s,background .3s;}
+		.contact-link:hover{color:var(--white);}
+		.contact-link:hover::before{width:40px;background:var(--white);}
+		.contact-form{display:flex;flex-direction:column;gap:1.2rem;}
+		.form-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--grey4);display:block;margin-bottom:.5rem;}
+		.form-input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--white);font-family:var(--mono);font-size:.8rem;padding:.9rem 1rem;outline:none;transition:border-color .2s,background .2s;border-radius:0;-webkit-appearance:none;}
+		.form-input:focus{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.05);}
+		textarea.form-input{resize:none;height:120px;}
+		.form-submit{background:var(--white);color:var(--black);border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;padding:1rem 2rem;cursor:pointer;transition:opacity .2s,transform .2s;clip-path:polygon(0 0,100% 0,100% 75%,calc(100% - 12px) 100%,0 100%);}
+		.form-submit:hover{opacity:.85;transform:translateY(-1px);}
+		#map{width:100%;height:360px;filter:grayscale(100%) invert(90%) contrast(80%);opacity:.35;}
+
+		/* FOOTER */
+		footer{background:var(--black);padding:3rem 0;position:relative;z-index:3;border-top:1px solid var(--border);}
+		.footer-inner{display:flex;align-items:center;justify-content:space-between;}
+		.footer-logo{font-weight:800;font-size:1rem;letter-spacing:-.02em;}
+		.footer-logo span{color:var(--grey4);}
+		.footer-copy{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--grey4);}
+		.footer-links{display:flex;gap:2rem;}
+		.footer-links a{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--grey4);text-decoration:none;transition:color .2s;}
+		.footer-links a:hover{color:var(--white);}
+
+		/* FIXED UI */
+		.progress-bar{position:fixed;top:0;left:0;height:1px;background:rgba(255,255,255,.4);z-index:1000;width:0%;transition:width .1s linear;}
+		.corner{position:fixed;width:32px;height:32px;border-color:rgba(255,255,255,.1);border-style:solid;z-index:50;pointer-events:none;}
+		.c-tl{top:1rem;left:1rem;border-width:1px 0 0 1px;}.c-tr{top:1rem;right:1rem;border-width:1px 1px 0 0;}
+		.c-bl{bottom:1rem;left:1rem;border-width:0 0 1px 1px;}.c-br{bottom:1rem;right:1rem;border-width:0 1px 1px 0;}
+		.top-label{position:fixed;top:1rem;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.03);color:rgba(255,255,255,.25);padding:.3rem 1rem;border-radius:2px;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;border:1px solid var(--border);z-index:100;white-space:nowrap;pointer-events:none;}
+
+		@media(max-width:900px){
+			.container{padding:0 24px;}nav{padding:1.2rem 1.5rem;}nav.scrolled{padding:.8rem 1.5rem;}
+			.nav-links{display:none;}.about-grid{grid-template-columns:1fr;gap:3rem;}
+			.about-right{grid-template-columns:1fr 1fr;transform:none;}.about-card{transform:none;}
+			.team-grid{grid-template-columns:repeat(2,1fr);}.testi-grid{grid-template-columns:1fr;}
+			.shop-grid{grid-template-columns:repeat(2,1fr);}.partners-grid{grid-template-columns:repeat(3,1fr);}
+			.contact-grid{grid-template-columns:1fr;gap:3rem;}.portfolio-stack{grid-template-columns:1fr;}
+			.services-header{flex-direction:column;align-items:flex-start;gap:1rem;}.services-desc{text-align:left;}
+			.service-row{grid-template-columns:40px 1fr 60px;}.service-tags{display:none;}
+			.footer-inner{flex-direction:column;gap:1rem;text-align:center;}
+		}
+	</style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen">
-        <div class="loader"></div>
-    </div>
-    
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="#hero">PUDINA STUDIO</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="background: var(--secondary-color);">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#testimonials">Clients</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Hero Section with Project Image Carousel -->
-    <section id="hero">
-        <div class="swiper hero-swiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide hero-slide">
-                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920" alt="Project 1" class="hero-bg-image">
-                    <div class="hero-overlay">
-                        <h1 data-aos="fade-up">Modern Architecture</h1>
-                        <p data-aos="fade-up" data-aos-delay="200">Crafting Spaces That Inspire</p>
-                        <button class="hero-btn" data-aos="fade-up" data-aos-delay="400">Explore Projects</button>
-                    </div>
-                </div>
-                <div class="swiper-slide hero-slide">
-                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920" alt="Project 2" class="hero-bg-image">
-                    <div class="hero-overlay">
-                        <h1 data-aos="fade-up">Innovative Design</h1>
-                        <p data-aos="fade-up" data-aos-delay="200">Where Creativity Meets Functionality</p>
-                        <button class="hero-btn" data-aos="fade-up" data-aos-delay="400">View Portfolio</button>
-                    </div>
-                </div>
-                <div class="swiper-slide hero-slide">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920" alt="Project 3" class="hero-bg-image">
-                    <div class="hero-overlay">
-                        <h1 data-aos="fade-up">Sustainable Living</h1>
-                        <p data-aos="fade-up" data-aos-delay="200">Building The Future</p>
-                        <button class="hero-btn" data-aos="fade-up" data-aos-delay="400">Learn More</button>
-                    </div>
-                </div>
-                <div class="swiper-slide hero-slide">
-                    <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920" alt="Project 4" class="hero-bg-image">
-                    <div class="hero-overlay">
-                        <h1 data-aos="fade-up">Timeless Elegance</h1>
-                        <p data-aos="fade-up" data-aos-delay="200">Architectural Excellence</p>
-                        <button class="hero-btn" data-aos="fade-up" data-aos-delay="400">Discover More</button>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
-    </section>
-    
-    <!-- About Section -->
-    <section id="about">
-        <div id="particles-about"></div>
-        <div class="container">
-            <h2 class="section-title" data-aos="fade-up">About Us</h2>
-            <div class="about-content" data-aos="fade-up" data-aos-delay="200">
-                <p>We are a team of passionate architects and designers dedicated to creating extraordinary spaces that blend aesthetics with functionality. Our approach combines innovative thinking with sustainable practices to deliver projects that stand the test of time.</p>
-                <p>With over a decade of experience, we've transformed visions into reality across residential, commercial, and public spaces. Every project is a unique journey, and we're committed to excellence at every step.</p>
-            </div>
-            <div class="stats-row">
-                <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
-                    <div class="stat-number">150+</div>
-                    <div class="stat-label">Projects Completed</div>
-                </div>
-                <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">Happy Clients</div>
-                </div>
-                <div class="stat-item" data-aos="fade-up" data-aos-delay="500">
-                    <div class="stat-number">25+</div>
-                    <div class="stat-label">Awards Won</div>
-                </div>
-                <div class="stat-item" data-aos="fade-up" data-aos-delay="600">
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Years Experience</div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Projects Section -->
-    <section id="projects">
-        <div class="container-fluid px-4">
-            <h2 class="section-title" data-aos="fade-up">Featured Projects</h2>
-            <div class="projects-masonry">
-                <div class="project-card" data-aos="fade-up" data-aos-delay="100">
-                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200" alt="Modern Villa" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Modern Villa</h3>
-                        <p class="project-category">Residential</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="150">
-                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800" alt="Corporate Tower" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Corporate Tower</h3>
-                        <p class="project-category">Commercial</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="200">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800" alt="Luxury Penthouse" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Luxury Penthouse</h3>
-                        <p class="project-category">Interior Design</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="250">
-                    <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800" alt="Eco House" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Eco House</h3>
-                        <p class="project-category">Sustainable</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="100">
-                    <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800" alt="Urban Loft" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Urban Loft</h3>
-                        <p class="project-category">Renovation</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="150">
-                    <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=800" alt="Minimalist Studio" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Minimalist Studio</h3>
-                        <p class="project-category">Residential</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="200">
-                    <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800" alt="Beach Resort" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Beach Resort</h3>
-                        <p class="project-category">Hospitality</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="250">
-                    <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1200" alt="Museum Expansion" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Museum Expansion</h3>
-                        <p class="project-category">Cultural</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="100">
-                    <img src="https://images.unsplash.com/photo-1600573472591-ee6c6e9e65b0?w=800" alt="Garden House" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Garden House</h3>
-                        <p class="project-category">Residential</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="150">
-                    <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800" alt="Skyline Apartment" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Skyline Apartment</h3>
-                        <p class="project-category">Residential</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="200">
-                    <img src="https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?w=800" alt="Office Complex" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Office Complex</h3>
-                        <p class="project-category">Commercial</p>
-                    </div>
-                </div>
-                <div class="project-card" data-aos="fade-up" data-aos-delay="250">
-                    <img src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800" alt="Boutique Hotel" class="project-image">
-                    <div class="project-overlay">
-                        <h3 class="project-title">Boutique Hotel</h3>
-                        <p class="project-category">Hospitality</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Services Section -->
-    <section id="services">
-        <div id="particles-services"></div>
-        <div class="container">
-            <h2 class="section-title" data-aos="fade-up">Our Services</h2>
-            <div class="services-grid">
-                <div class="service-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="service-icon">🏛️</div>
-                    <h3 class="service-title">Architecture Design</h3>
-                    <p class="service-description">Comprehensive architectural solutions from concept to completion, tailored to your unique vision and needs.</p>
-                </div>
-                <div class="service-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="service-icon">🎨</div>
-                    <h3 class="service-title">Interior Design</h3>
-                    <p class="service-description">Creating stunning interiors that reflect your personality while maximizing comfort and functionality.</p>
-                </div>
-                <div class="service-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="service-icon">🏗️</div>
-                    <h3 class="service-title">Construction Management</h3>
-                    <p class="service-description">End-to-end project management ensuring quality, timeline, and budget adherence throughout construction.</p>
-                </div>
-                <div class="service-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="service-icon">🌱</div>
-                    <h3 class="service-title">Sustainable Design</h3>
-                    <p class="service-description">Eco-friendly solutions that minimize environmental impact while creating beautiful, efficient spaces.</p>
-                </div>
-                <div class="service-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="service-icon">📐</div>
-                    <h3 class="service-title">3D Visualization</h3>
-                    <p class="service-description">Photorealistic renders and virtual tours that bring your project to life before construction begins.</p>
-                </div>
-                <div class="service-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="service-icon">🔧</div>
-                    <h3 class="service-title">Renovation</h3>
-                    <p class="service-description">Transforming existing spaces with creative solutions that breathe new life into your property.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Team Section -->
-    <section id="team">
-        <div class="container-fluid px-4">
-            <h2 class="section-title" data-aos="fade-up">Our Team</h2>
-            <div class="team-masonry">
-                <div class="team-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="team-image-wrapper">
-                        <img src="assets/img/team/team-3.jpg" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Nugroho Eko Saputra Batubara</h3>
-                        <p class="team-role">Software Developer</p>
-                        <div class="team-social">
-                            <a target="_blank" href="https://nugroho-portfolio.netlify.app/"><i class="bx bxl-google-cloud"></i></a>
-                            <a target="_blank" href="https://www.linkedin.com/in/nugroho-eko-saputra-batubara-755945240/"><i class="fab fa-linkedin-in"></i></a>
-                            <a target="_blank" href="https://www.instagram.com/nugrohonesb_"><i class="fab fa-instagram"></i></a>
-                            <a target="_blank" href="http://tiktok.com/@zoraaproject"><i class="bx bxl-tiktok"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="150">
-                    <div class="team-image-wrapper">
-                        <img src="assets/img/team/team-1.jpg" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Firza Abdi Setiawan</h3>
-                        <p class="team-role">Interior Designer</p>
-                        <div class="team-social">
-                            <a target="_blank" href="https://www.fiverr.com/s/jjQZXea"><i class="bx bxl-google-cloud"></i></a>
-                            <a target="_blank" href="https://pin.it/7xfGzhwG4"><i class="fa-brands fa-pinterest"></i></a>
-                            <a target="_blank" href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a target="_blank" href="https://x.com/abdi_firza"><i class="bx bxl-twitter"></i></a>
-                            <a target="_blank" href="https://www.instagram.com/firzaabdisetiawan"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="team-image-wrapper">
-                        <img src="assets/img/team/team-2.jpeg" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Ragil Yong Sen Dwi Putra</h3>
-                        <p class="team-role">Project Admin</p>
-                        <div class="team-social">
-                            <a target="_blank" href="https://www.linkedin.com/in/ragil-yong-sen-21b4bb20a/"><i class="fab fa-linkedin-in"></i></a>
-                            <a target="_blank" href="https://www.instagram.com/rglseenn"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="250">
-                    <div class="team-image-wrapper">
-                        <img src="assets/img/team/team-4.jpg" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Nur Mayang Suri</h3>
-                        <p class="team-role">Purchasing</p>
-                        <div class="team-social">
-                            <a target="_blank" href="https://www.instagram.com/mygsurii"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <!-- <div class="team-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">James Anderson</h3>
-                        <p class="team-role">Senior Architect</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="150">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Lisa Taylor</h3>
-                        <p class="team-role">Sustainability Expert</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Robert Kim</h3>
-                        <p class="team-role">Structural Engineer</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="250">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Amanda Foster</h3>
-                        <p class="team-role">Design Coordinator</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Daniel Park</h3>
-                        <p class="team-role">Landscape Architect</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="150">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Nina Rodriguez</h3>
-                        <p class="team-role">Junior Architect</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Chris Lee</h3>
-                        <p class="team-role">BIM Specialist</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="250">
-                    <div class="team-image-wrapper">
-                        <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600" alt="Team Member" class="team-image">
-                    </div>
-                    <div class="team-info">
-                        <h3 class="team-name">Maya Patel</h3>
-                        <p class="team-role">Urban Planner</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="bx bxl-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div> -->
-            </div>
-        </div>
-    </section>
-    
-    <!-- Testimonials Section -->
-    <section id="testimonials">
-        <div id="particles-testimonials"></div>
-        <div class="container testimonials-wrapper">
-            <h2 class="section-title" data-aos="fade-up">What Clients Say</h2>
-            <div class="swiper testimonial-swiper">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide testimonial-slide">
-                        <p class="testimonial-text">"ArchStudio transformed our house into a dream home. Their attention to detail and creative vision exceeded all our expectations. Highly recommended!"</p>
-                        <p class="testimonial-author">Jessica Williams</p>
-                        <p class="testimonial-position">Homeowner</p>
-                    </div>
-                    <div class="swiper-slide testimonial-slide">
-                        <p class="testimonial-text">"Professional, creative, and committed to excellence. The team delivered our office project on time and beyond our imagination. Simply outstanding!"</p>
-                        <p class="testimonial-author">Robert Thompson</p>
-                        <p class="testimonial-position">CEO, Tech Corp</p>
-                    </div>
-                    <div class="swiper-slide testimonial-slide">
-                        <p class="testimonial-text">"Working with ArchStudio was a pleasure from start to finish. They understood our vision and brought it to life with incredible precision and style."</p>
-                        <p class="testimonial-author">Amanda Lee</p>
-                        <p class="testimonial-position">Restaurant Owner</p>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Partners Section -->
-    <section id="partners">
-        <div class="container">
-            <h2 class="partners-title" data-aos="fade-up">Partners</h2>
-            <div class="partners-marquee">
-                <div class="partners-track">
-                    <!-- First set -->
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 1</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 2</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 3</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 4</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 5</text>
-                        </svg>
-                    </div>
-                    <!-- Duplicate set for seamless loop -->
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 1</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 2</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 3</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 4</text>
-                        </svg>
-                    </div>
-                    <div class="partner-logo">
-                        <svg width="150" height="60" viewBox="0 0 150 60">
-                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">BRAND 5</text>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Contact Section with Map -->
-    <section id="contact">
-        <div class="container">
-            <h2 class="section-title" data-aos="fade-up">Get In Touch</h2>
-            <div class="contact-wrapper">
-                <div class="contact-info" data-aos="fade-right">
-                    <h3>Let's Create Something Amazing Together</h3>
-                    <div class="contact-item">
-                        <h4>Address</h4>
-                        <!-- <p>Jl. Sudirman No. 123<br>Jakarta Selatan, 12190<br>Indonesia</p> -->
-                        <p>Sumur Batu<br>Central Jakarta 10640<br>Indonesia</p>
-                    </div>
-                    <div class="contact-item">
-                        <h4>Phone</h4>
-                        <!-- <p>+62 21 1234 5678<br>+62 812 3456 7890</p> -->
-                        <p>+62 8-<br>+62 8-</p>
-                    </div>
-                    <div class="contact-item">
-                        <h4>Email</h4>
-                        <!-- <p>info@archstudio.com<br>contact@archstudio.com</p> -->
-                        <p>nugrohonesb@gmail.com<br>-</p>
-                    </div>
-                    <div class="contact-item">
-                        <h4>Working Hours</h4>
-                        <!-- <p>Monday - Friday: 9:00 - 17:00 (9:00 AM - 5:00 PM)<br>Saturday: 10:00 - 14:00</p> -->
-                        <p>Monday - Friday: 9:00 - 17:00 (9:00 AM - 5:00 PM)</p>
-                    </div>
-                </div>
-                <div data-aos="fade-left">
-                    <div id="map"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">PUDINA STUDIO</div>
-                <p class="footer-text">Creating timeless architecture that inspires and endures. Let's build your dream space together.</p>
-                <div class="footer-social">
-                    <a target="_blank" href="https://www.instagram.com/pudinastudio"><i class="fab fa-instagram"></i></a>
-                    <a target="_blank" href="#"><i class="bx bxl-tiktok"></i></a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>Pudina Studio &copy; Nugroho Eko S Batubara 2025 - <span id="year"></span>. All Rights Reserved.</p>
-                 <!-- <p><a href="#"><strong></strong></a></p> -->
-            </div>
-        </div>
-    </footer>
-    
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="assets/js/main.js"></script>
-    
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="vanta-bg"></div>
+<div class="progress-bar" id="progress"></div>
+<div class="corner c-tl"></div><div class="corner c-tr"></div>
+<div class="corner c-bl"></div><div class="corner c-br"></div>
+<!-- <div class="top-label">NUBARA / v1.0</div> -->
+
+<nav id="navbar">
+	<a href="#hero" class="nav-logo">NUB<span>ARA</span></a>
+	<ul class="nav-links">
+		<li><a href="#about">About</a></li>
+		<li><a href="#services">Services</a></li>
+		<li><a href="#portfolio">Works</a></li>
+		<li><a href="#shop">Shop</a></li>
+		<li><a href="#team">Team</a></li>
+		<li><a href="#contact">Contact</a></li>
+	</ul>
+	<a href="#contact" class="nav-cta">Get in Touch →</a>
+</nav>
+
+<div class="site-wrap">
+
+<section id="hero">
+	<div class="hero-tag">Full-Service Digital Studio</div>
+	<h1 class="hero-title" id="heroTitle">CODE<br/>MEETS<br/><span>CRAFT</span></h1>
+	<p class="hero-sub" id="heroSub">We build, design &amp; ship</p>
+	<div class="hero-scroll" id="scrollHint">
+		<div class="scroll-line"></div>
+		<span>Scroll</span>
+	</div>
+</section>
+
+<div class="marquee-wrap">
+	<div class="marquee-track">
+		<span>Web Development</span><span class="dot">·</span><span>UI/UX Design</span><span class="dot">·</span>
+		<span>E-Commerce</span><span class="dot">·</span><span>Branding</span><span class="dot">·</span>
+		<span>Mobile Apps</span><span class="dot">·</span><span>Digital Strategy</span><span class="dot">·</span>
+		<span>Software Dev</span><span class="dot">·</span><span>Web Development</span><span class="dot">·</span>
+		<span>UI/UX Design</span><span class="dot">·</span><span>E-Commerce</span><span class="dot">·</span>
+		<span>Branding</span><span class="dot">·</span><span>Mobile Apps</span><span class="dot">·</span>
+		<span>Digital Strategy</span><span class="dot">·</span><span>Software Dev</span><span class="dot">·</span>
+	</div>
+</div>
+
+<section id="about">
+	<div class="container">
+		<div class="about-grid">
+			<div class="about-left" data-aos="fade-right" data-aos-duration="900">
+				<div class="eyebrow">About Us</div>
+				<h2 class="about-title">We craft digital<br/><em>experiences</em><br/>that matter.</h2>
+				<p class="about-body">Nubara adalah full-service digital studio yang menggabungkan keahlian teknis dengan kepekaan desain. Kami membangun produk digital yang tidak hanya berfungsi — tapi juga berkesan.</p>
+				<div class="about-stats">
+					<div class="stat-item"><div class="num">50+</div><div class="lbl">Projects</div></div>
+					<div class="stat-item"><div class="num">30+</div><div class="lbl">Clients</div></div>
+					<div class="stat-item"><div class="num">5yr</div><div class="lbl">Experience</div></div>
+				</div>
+			</div>
+			<div class="about-right" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
+				<div class="about-card"><div class="about-card-icon">⬡</div><h4>Pixel Perfect</h4><p>Setiap detail dirancang dengan presisi tinggi, dari tipografi hingga spacing.</p></div>
+				<div class="about-card"><div class="about-card-icon">◈</div><h4>Tech Driven</h4><p>Stack modern, performa optimal, dan skalabel untuk masa depan.</p></div>
+				<div class="about-card"><div class="about-card-icon">◇</div><h4>Result Focused</h4><p>Setiap keputusan desain dan teknis berbasis pada impact bisnis nyata.</p></div>
+				<div class="about-card"><div class="about-card-icon">✦</div><h4>Full Service</h4><p>Dari konsep hingga launch — kami handle semua aspek produk digital kamu.</p></div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section id="services">
+	<div class="container">
+		<div class="services-header" data-aos="fade-up" data-aos-duration="800">
+			<h2 class="services-title">What We<br/><em>Do Best</em></h2>
+			<p class="services-desc">Layanan kami dirancang untuk memenuhi semua kebutuhan digital bisnis kamu — dari A hingga Z.</p>
+		</div>
+		<div class="services-list">
+			<div class="service-row" data-aos="fade-up" data-aos-delay="0" data-aos-duration="600"><span class="service-num">01</span><span class="service-name">Web Development</span><div class="service-tags"><span class="tag-pill">React</span><span class="tag-pill">Next.js</span><span class="tag-pill">Laravel</span></div><span class="service-arrow">→</span></div>
+			<div class="service-row" data-aos="fade-up" data-aos-delay="60" data-aos-duration="600"><span class="service-num">02</span><span class="service-name">UI/UX Design</span><div class="service-tags"><span class="tag-pill">Figma</span><span class="tag-pill">Prototyping</span></div><span class="service-arrow">→</span></div>
+			<div class="service-row" data-aos="fade-up" data-aos-delay="120" data-aos-duration="600"><span class="service-num">03</span><span class="service-name">E-Commerce</span><div class="service-tags"><span class="tag-pill">Shopify</span><span class="tag-pill">WooCommerce</span></div><span class="service-arrow">→</span></div>
+			<div class="service-row" data-aos="fade-up" data-aos-delay="180" data-aos-duration="600"><span class="service-num">04</span><span class="service-name">Mobile Development</span><div class="service-tags"><span class="tag-pill">Flutter</span><span class="tag-pill">React Native</span></div><span class="service-arrow">→</span></div>
+			<div class="service-row" data-aos="fade-up" data-aos-delay="240" data-aos-duration="600"><span class="service-num">05</span><span class="service-name">Branding &amp; Identity</span><div class="service-tags"><span class="tag-pill">Logo</span><span class="tag-pill">Guidelines</span></div><span class="service-arrow">→</span></div>
+			<div class="service-row" data-aos="fade-up" data-aos-delay="300" data-aos-duration="600"><span class="service-num">06</span><span class="service-name">Digital Strategy</span><div class="service-tags"><span class="tag-pill">SEO</span><span class="tag-pill">Analytics</span></div><span class="service-arrow">→</span></div>
+		</div>
+	</div>
+</section>
+
+<section id="portfolio">
+	<div class="container">
+		<div class="portfolio-header" data-aos="fade-up" data-aos-duration="800">
+			<h2 class="portfolio-title">Selected<br/><em>Works</em></h2>
+			<a href="#" class="portfolio-link">View all projects</a>
+		</div>
+		<div class="portfolio-stack">
+			<div class="file-card" data-aos="fade-up" data-aos-delay="0" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80" alt="Arventa Store" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">E-Commerce · 2024</div><div class="file-title">Arventa Store</div><div class="file-desc">Platform e-commerce fashion dengan sistem rekomendasi produk berbasis AI.</div></div></div>
+			<div class="file-card" data-aos="fade-up" data-aos-delay="100" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Orion Dashboard" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">Web App · 2024</div><div class="file-title">Orion Dashboard</div><div class="file-desc">Analytics dashboard real-time untuk monitoring performa bisnis multi-cabang.</div></div></div>
+			<div class="file-card" data-aos="fade-up" data-aos-delay="200" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80" alt="Kova Identity" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">Branding · 2024</div><div class="file-title">Kova Identity</div><div class="file-desc">Sistem identitas visual lengkap untuk startup fintech Series A.</div></div></div>
+			<div class="file-card" data-aos="fade-up" data-aos-delay="100" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80" alt="Muday App" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">Mobile · 2023</div><div class="file-title">Muday App</div><div class="file-desc">Aplikasi mobile untuk manajemen keuangan personal dengan UX yang intuitif.</div></div></div>
+			<div class="file-card" data-aos="fade-up" data-aos-delay="200" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&q=80" alt="Pulsar CMS" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">Web Dev · 2023</div><div class="file-title">Pulsar CMS</div><div class="file-desc">Content management system custom untuk media digital dengan traffic tinggi.</div></div></div>
+			<div class="file-card" data-aos="fade-up" data-aos-delay="300" data-aos-duration="700"><div class="file-tab"></div><div class="file-thumb"><img src="https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&q=80" alt="Nestly Design" loading="lazy"/><div class="file-thumb-label"><span>View Project →</span></div></div><div class="file-body"><div class="file-meta">UI/UX · 2023</div><div class="file-title">Nestly Design</div><div class="file-desc">Redesign platform properti digital — meningkatkan konversi 140% dalam 3 bulan.</div></div></div>
+		</div>
+	</div>
+</section>
+
+<section id="shop">
+	<div class="container">
+		<div class="shop-header" data-aos="fade-up" data-aos-duration="800">
+			<h2 class="shop-title">Digital<br/><em>Products</em></h2>
+			<a href="#" class="portfolio-link">Browse all →</a>
+		</div>
+		<div class="shop-grid" data-aos="fade-up" data-aos-delay="100" data-aos-duration="800">
+			<div class="product-card"><div class="product-thumb">⬡</div><div class="product-cat">UI Kit</div><div class="product-name">Mono System UI Kit</div><div class="product-price">Rp 299.000 <span>/ license</span></div><button class="product-btn">Add to Cart</button></div>
+			<div class="product-card"><div class="product-thumb">◈</div><div class="product-cat">Template</div><div class="product-name">Agency Pro Template</div><div class="product-price">Rp 499.000 <span>/ license</span></div><button class="product-btn">Add to Cart</button></div>
+			<div class="product-card"><div class="product-thumb">✦</div><div class="product-cat">Course</div><div class="product-name">Figma Masterclass</div><div class="product-price">Rp 799.000 <span>/ lifetime</span></div><button class="product-btn">Add to Cart</button></div>
+			<div class="product-card"><div class="product-thumb">◇</div><div class="product-cat">Resource</div><div class="product-name">Icon Pack Vol.2</div><div class="product-price">Rp 149.000 <span>/ license</span></div><button class="product-btn">Add to Cart</button></div>
+		</div>
+	</div>
+</section>
+
+<section id="team">
+	<div class="container">
+		<div class="team-header" data-aos="fade-up" data-aos-duration="800">
+			<div class="eyebrow">The People</div>
+			<h2 class="team-title">Meet the<br/><em>Team</em></h2>
+		</div>
+		<div class="team-grid">
+			<div class="team-card" data-aos="fade-up" data-aos-delay="0" data-aos-duration="700"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Arya Nubara" loading="lazy"/></div><div class="team-name">Arya Nubara</div><div class="team-role">Founder & CEO</div><div class="team-bio">Visionary di balik Nubara. 8 tahun pengalaman di industri digital dan teknologi.</div></div>
+			<div class="team-card" data-aos="fade-up" data-aos-delay="80" data-aos-duration="700"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="Sena Wirawan" loading="lazy"/></div><div class="team-name">Sena Wirawan</div><div class="team-role">Lead Developer</div><div class="team-bio">Full-stack engineer dengan spesialisasi di arsitektur cloud dan sistem skalabel.</div></div>
+			<div class="team-card" data-aos="fade-up" data-aos-delay="160" data-aos-duration="700"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80" alt="Rara Kinasih" loading="lazy"/></div><div class="team-name">Rara Kinasih</div><div class="team-role">Design Lead</div><div class="team-bio">UI/UX designer dengan pendekatan research-driven dan obsesi terhadap detail.</div></div>
+			<div class="team-card" data-aos="fade-up" data-aos-delay="240" data-aos-duration="700"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" alt="Dimas Prasetyo" loading="lazy"/></div><div class="team-name">Dimas Prasetyo</div><div class="team-role">Strategy Director</div><div class="team-bio">Digital strategist yang membantu klien menemukan solusi tepat untuk growth.</div></div>
+		</div>
+	</div>
+</section>
+
+<section id="testimonials">
+	<div class="container">
+		<div class="testi-header" data-aos="fade-up" data-aos-duration="800">
+			<div class="eyebrow">Client Say</div>
+			<h2 class="testi-title">What They<br/><em>Say</em></h2>
+		</div>
+		<div class="testi-grid">
+			<div class="testi-card" data-aos="fade-up" data-aos-delay="0" data-aos-duration="700"><div class="testi-inner"><div class="testi-quote">"</div><p class="testi-text">Nubara benar-benar mengubah cara pandang kami tentang produk digital. Hasilnya jauh melampaui ekspektasi dan timeline sangat terjaga.</p><div class="testi-author"><div class="testi-avatar">A</div><div><div class="testi-name">Aldi Firmansyah</div><div class="testi-company">CEO, Arventa Group</div></div></div></div></div>
+			<div class="testi-card" data-aos="fade-up" data-aos-delay="100" data-aos-duration="700"><div class="testi-inner"><div class="testi-quote">"</div><p class="testi-text">Tim yang sangat profesional dan komunikatif. Mereka tidak hanya execute, tapi juga memberikan insight berharga untuk bisnis kami.</p><div class="testi-author"><div class="testi-avatar">S</div><div><div class="testi-name">Sarah Amalia</div><div class="testi-company">Co-founder, Muday</div></div></div></div></div>
+			<div class="testi-card" data-aos="fade-up" data-aos-delay="200" data-aos-duration="700"><div class="testi-inner"><div class="testi-quote">"</div><p class="testi-text">Conversion rate kami naik 140% setelah redesign oleh Nubara. Investasi terbaik yang pernah kami buat untuk platform digital kami.</p><div class="testi-author"><div class="testi-avatar">B</div><div><div class="testi-name">Budi Santoso</div><div class="testi-company">CTO, Nestly</div></div></div></div></div>
+		</div>
+	</div>
+</section>
+
+<section id="partners">
+	<div class="container">
+		<div class="partners-header" data-aos="fade-up" data-aos-duration="800">
+			<div class="eyebrow" style="justify-content:center;">Trusted By</div>
+			<h3 class="partners-title">Our Partners &amp; Clients</h3>
+		</div>
+		<div class="partners-grid" data-aos="fade-up" data-aos-delay="100" data-aos-duration="800">
+			<div class="partner-item"><span class="partner-logo">ARVENTA</span></div>
+			<div class="partner-item"><span class="partner-logo">KOVA CO.</span></div>
+			<div class="partner-item"><span class="partner-logo">MUDAY</span></div>
+			<div class="partner-item"><span class="partner-logo">NESTLY</span></div>
+			<div class="partner-item"><span class="partner-logo">PULSAR</span></div>
+			<div class="partner-item"><span class="partner-logo">ORION</span></div>
+		</div>
+	</div>
+</section>
+
+<section id="contact">
+	<div class="container">
+		<div class="contact-grid">
+			<div class="contact-left" data-aos="fade-right" data-aos-duration="900">
+				<div class="eyebrow">Contact</div>
+				<h2 class="contact-title">Let's Build<br/>Something<br/><em>Together</em></h2>
+				<p class="contact-body">Punya proyek di benak kamu? Kami selalu terbuka untuk kolaborasi baru. Ceritakan visi kamu, dan mari kita wujudkan bersama.</p>
+				<div class="contact-links">
+					<a href="/cdn-cgi/l/email-protection#771f121b1b1837190215160516591e13" class="contact-link"><span class="__cf_email__" data-cfemail="18707d74747758766d7a796a7936717c">[email&#160;protected]</span></a>
+					<a href="tel:+6281234567890" class="contact-link">+62 812 3456 7890</a>
+					<a href="#" class="contact-link">Jakarta, Indonesia</a>
+				</div>
+			</div>
+			<div class="contact-right" data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
+				<form class="contact-form" onsubmit="return false;">
+					<div class="form-group"><label class="form-label">Your Name</label><input type="text" class="form-input" placeholder="John Doe" /></div>
+					<div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" placeholder="john@company.com" /></div>
+					<div class="form-group"><label class="form-label">Project Type</label><input type="text" class="form-input" placeholder="e.g. Web Development, UI/UX..." /></div>
+					<div class="form-group"><label class="form-label">Message</label><textarea class="form-input" placeholder="Tell us about your project..."></textarea></div>
+					<button class="form-submit">Send Message →</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div id="map"></div>
+</section>
+
+<footer>
+	<div class="container">
+		<div class="footer-inner">
+			<div class="footer-logo">NUB<span>ARA</span></div>
+			<div class="footer-copy">© 2024 Nubara. All rights reserved.</div>
+			<div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Instagram</a></div>
+		</div>
+	</div>
+</footer>
+
+</div>
+
+<!-- <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══════════════════════════════════════
+// NUBARA — main.js
+// ══════════════════════════════════════
+
+// ── VANTA NET BACKGROUND
+VANTA.NET({
+  el: "#vanta-bg",
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+  minHeight: 200,
+  minWidth: 200,
+  color: 0xffffff,
+  backgroundColor: 0x050508,
+  points: 12,
+  maxDistance: 20,
+  spacing: 18
+});
+
+// ── AOS SCROLL ANIMATIONS
+AOS.init({
+  once: false,
+  mirror: true,
+  offset: 80,
+  easing: 'ease-out-quart'
+});
+
+// ── CUSTOM CURSOR
+const cursor     = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+
+function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+// Cursor hover effect on interactive elements
+document.querySelectorAll('a, button, .service-row, .file-card, .product-card, .team-card, .partner-item').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.classList.add('hover'); cursorRing.classList.add('hover'); });
+  el.addEventListener('mouseleave', () => { cursor.classList.remove('hover'); cursorRing.classList.remove('hover'); });
+});
+
+// ── NAVBAR + SCROLL HINT
+const navbar      = document.getElementById('navbar');
+const progressBar = document.getElementById('progress');
+const heroTitle   = document.getElementById('heroTitle');
+const heroSub     = document.getElementById('heroSub');
+const scrollHint  = document.getElementById('scrollHint');
+
+let cur = 0, tgt = 0;
+
+window.addEventListener('scroll', () => {
+  tgt = window.scrollY;
+  navbar.classList.toggle('scrolled', tgt > 60);
+  scrollHint.classList.toggle('hidden', tgt > 80);
+});
+
+// ── PARALLAX + PROGRESS BAR (RAF loop)
+function frame() {
+  cur += (tgt - cur) * 0.08;
+
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = cur / max;
+
+  progressBar.style.width = (pct * 100) + '%';
+
+  heroTitle.style.transform = `translateY(${cur * -0.45}px)`;
+  heroTitle.style.opacity   = Math.max(0, 1 - pct * 4);
+
+  heroSub.style.transform = `translateY(${cur * -0.2}px)`;
+  heroSub.style.opacity   = Math.max(0, 1 - pct * 5);
+
+  requestAnimationFrame(frame);
+}
+frame();
+
+// ── LEAFLET MAP
+const map = L.map('map', { zoomControl: false, scrollWheelZoom: false })
+  .setView([-6.2088, 106.8456], 14);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+const markerIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:12px;height:12px;background:#fff;border-radius:50%;
+    box-shadow:0 0 0 4px rgba(255,255,255,.2),0 0 20px rgba(255,255,255,.4)
+  "></div>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6]
+});
+
+L.marker([-6.2088, 106.8456], { icon: markerIcon })
+  .addTo(map)
+  .bindPopup(`
+    <b style="font-family:monospace;font-size:11px">NUBARA STUDIO</b><br>
+    <span style="font-family:monospace;font-size:10px;color:#666">Jakarta, Indonesia</span>
+  `);
+
+// ── RESET SCROLL ON RELOAD
+window.onbeforeunload = () => window.scrollTo(0, 0);
+</script>
 </body>
 </html>
