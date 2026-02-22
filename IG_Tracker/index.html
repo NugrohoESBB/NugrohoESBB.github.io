@@ -650,9 +650,6 @@ function readFile(file, type) {
 }
 
 function extractUsernames(json, type) {
-  // Instagram JSON format varies
-  // followers: array of { string_list_data: [{value, href, timestamp}] }
-  // following: { relationships_following: [...] } or direct array
   let items = [];
   
   if (Array.isArray(json)) {
@@ -662,17 +659,28 @@ function extractUsernames(json, type) {
   } else if (json.relationships_followers) {
     items = json.relationships_followers;
   } else {
-    // Try to find array in first key
     const firstKey = Object.keys(json)[0];
     if (Array.isArray(json[firstKey])) items = json[firstKey];
   }
 
   return items.map(item => {
-    if (item.string_list_data && item.string_list_data[0]) {
+    // followers format: string_list_data[0].value berisi username
+    if (item.string_list_data && item.string_list_data[0] && item.string_list_data[0].value) {
       return {
         username: item.string_list_data[0].value,
         href: item.string_list_data[0].href,
         timestamp: item.string_list_data[0].timestamp
+      };
+    }
+    // following format: username ada di "title", href di string_list_data[0].href
+    if (item.title && item.title.trim() !== '') {
+      const href = (item.string_list_data && item.string_list_data[0])
+        ? item.string_list_data[0].href
+        : `https://instagram.com/${item.title}`;
+      return {
+        username: item.title,
+        href: href,
+        timestamp: item.string_list_data && item.string_list_data[0] ? item.string_list_data[0].timestamp : null
       };
     }
     if (typeof item === 'string') return { username: item, href: `https://instagram.com/${item}` };
